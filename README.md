@@ -3,7 +3,7 @@
 
 ## Learning Topological Structure and Compatible Features of Cell Networks for Spatial Domains with Graph Denoising  
 
-### Haiyue Wang and Xiaoke Ma<sup>*</sup>    
+### Haiyue Wang, Wensheng Zhang, Shiquan Sun and Xiaoke Ma<sup>*</sup>    
 
 ### Contributing authors: xkma@xidian.edu.cn;  
 
@@ -20,20 +20,60 @@ model for analyzing ST data.
 
 ![stACN_framework](docs/stACN_framework.png)  
 
+# Installation
+
+#### <font color='red'>To accelerate stACN by using GPU: If you have an NVIDIA GPU (CUDA toolkit supported), be sure to firstly install a version of PyTorch that supports it. When installing stACN without install Pytorch previous, the CPU version of torch will be installed by default for you. Here is the [installation guide of PyTorch](https://pytorch.org/get-started/locally/).</font>
+
+#### 1. Start by using python virtual environment with [conda](https://anaconda.org/):
+
+```
+conda create --name stACN python=3.9
+conda activate stACN
+pip install stACN
+```
+
+(Optional) To run the notebook files in tutorials, please ensure the Jupyter package is installed in your environment:
+
+```
+conda install -n stacn ipykernel
+python -m ipykernel install --user --name stacn --display-name stacn-jupyter
+```
+
+## Versions the software has been tested on:
+
+Environment 1:
+
+- Operation System (OS): Linux 5.4.0
+
+- Python: 3.10.12
+
+- Python packages: scanpy=1.9.3, numpy=1.26.4, pandas=2.2.2, anndata=0.10.8, scipy=1.14.0, scikit-learn=1.5.1, torch=2.0.1 (cu118), matplotlib=3.9.1, psutil=5.9.5, tqdm=4.66.4, leidenalg=0.10.2
+
+Environment 2:
+
+- Operation System (OS): Windows 11
+
+- Python: 3.9.19
+
+- Python packages: scanpy=1.10.1, numpy=1.26.4, pandas=2.2.2, anndata=0.10.7, scipy=1.13.0, scikit-learn=1.4.2, torch=2.2.2, matplotlib=3.8.4, psutil=5.9.0, tqdm=4.66.4, leidenalg=0.10.2
 
 ## System Requirements
 
-#### Python support packages  (Python 3.9.18): 
+#### Python support packages  (Python$\geq$3.8): 
 
-scanpy, igraph, pandas, numpy, scipy, scanpy, anndata, sklearn, seaborn, torch, leidenalg, tqdm.
-
-For more details of the used package., please refer to 'requirements.txt' file.
+scanpy, pandas, numpy, scipy, anndata, sklearn, seaborn, torch, leidenalg, tqdm.
 
 ## Tutorial
 
-A jupyter Notebook of the tutorial for 10 $\times$ Visium is accessible from :  
+A jupyter notebook of the tutorial for 10 $\times$ Visium is accessible from :  
 
 https://github.com/xkmaxidian/stACN/blob/master/tuorial/Tutorial1_10x_Visium%20(DLPFC_dataset).ipynb  
+
+The jupyter notebook of the tutorial for installing stACN using pip and identifying spatial domains is accessible from:
+
+https://github.com/xkmaxidian/stACN/blob/master/tuorial/Visium_pypi.ipynb
+
+
 
 ## Compared spatial domain identification algorithms
 
