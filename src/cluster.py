@@ -4,7 +4,7 @@ import igraph as ig
 import leidenalg
 from natsort import natsorted
 import pandas as pd
-import logger as l
+import src.logger as l
 
 # 聚类
 def cluster(Z_all, ground_truth):

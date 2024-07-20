@@ -1,27 +1,9 @@
+import mnmstpy
 import numpy as np
 from numpy.linalg import svd
 from scipy.spatial.distance import cdist
-
-
-def soft_numpy(x, T):
-    """
-   Apply the soft thresholding operator to the input array using NumPy.
-
-   Soft thresholding is a component of various sparse coding algorithms. It shrinks the input values towards zero, potentially setting some to zero if they are below the threshold T, which can be useful for denoising and regularization.
-
-   Parameters:
-   - x: A NumPy array containing the input data to be thresholded.
-   - T: A non-negative threshold value or array. If T is an array, it should be broadcastable to the shape of x.
-
-   Returns:
-   - y: A NumPy array containing the result of applying the soft thresholding operator to the input data. Each element in x is reduced by the threshold T if its absolute value is greater than T; otherwise, it is set to zero.
-   """
-    if np.sum(np.abs(T)) == 0.:
-        y = x
-    else:
-        y = np.maximum(np.abs(x) - T, 0.)
-        y = np.sign(x) * y
-    return y
+import torch
+from scipy import sparse
 
 
 def soft(x, T):
@@ -45,6 +27,28 @@ def soft(x, T):
     return y
 
 
+def create_sppmi_mtx_torch(G, k, device='cpu'):
+    # Calculating Degrees for each node
+    if not isinstance(G, torch.Tensor):
+        G = torch.Tensor(G).to(torch.float32).to(device)
+    node_degrees = torch.sum(G, dim=0)
+    node_degrees2 = torch.sum(G, dim=1)
+    W = torch.sum(node_degrees)
+
+    sppmi = G.clone()
+
+    indices = torch.nonzero(G)
+    row = indices[:, 0]
+    col = indices[:, 1]
+    weights = G[row, col]
+
+    for i in range(len(col)):
+        score = torch.log(weights[i] * W / (node_degrees2[col[i]] * node_degrees[row[i]])) - torch.log(k)
+        sppmi[col[i], row[i]] = max(score, torch.tensor(0.0))
+
+    return sppmi
+
+
 def create_sppmi_mtx(G, k):
     """
     Create a Shifted Positive Pointwise Mutual Information (SPPMI) matrix from a given co-occurrence matrix.
@@ -56,6 +60,8 @@ def create_sppmi_mtx(G, k):
     Returns:
     - sppmi: A matrix of the same shape as G, where each element contains the SPPMI score between items i and j.
     """
+    if not isinstance(G, np.ndarray):
+        G = G.A
     node_degrees = np.array(G.sum(axis=0)).flatten()
     node_degrees2 = np.array(G.sum(axis=1)).flatten()
     W = np.sum(node_degrees)
@@ -70,6 +76,15 @@ def create_sppmi_mtx(G, k):
         sppmi[row[index], col[index]] = max(score, 0.0)
 
     return sppmi
+
+
+def solve_l1l2_torch(W, lamb):
+    n = W.size(0)
+    E = W.clone()
+
+    for i in range(n):
+        E[i, :] = solve_l2_torch(W[i, :], lamb)
+    return E
 
 
 def solve_l1l2(W, lamb):
@@ -92,6 +107,15 @@ def solve_l1l2(W, lamb):
         E[i, :] = solve_l2(W[i, :], lamb)
         # print(E[:, i])
     return E
+
+
+def solve_l2_torch(w, lamb):
+    nw = torch.norm(w)
+    if nw > lamb:
+        x = (nw - lamb) * w / nw
+    else:
+        x = torch.zeros_like(w)
+    return x
 
 
 def solve_l2(w, lamb):
@@ -141,6 +165,15 @@ def opt_p(Y, mu, A, X):
     return P
 
 
+def opt_p_torch(Y, mu, A, X):
+    device, dtype = X.device, X.dtype
+    Q = (A - Y / mu).t()
+    W = torch.mm(X, Q) + torch.tensor(torch.finfo(dtype).eps, device=device, dtype=dtype)
+    U, S, Vt = torch.linalg.svd(W, full_matrices=False)
+    PT = torch.mm(U, Vt)
+    return PT.t()
+
+
 def construct_w_pkn(X, k=5, issymmetric=1):
     """
     Construct similarity matrix W using the PKN algorithm.
@@ -155,8 +188,7 @@ def construct_w_pkn(X, k=5, issymmetric=1):
     """
     dim, n = X.shape
     D = cdist(X.T, X.T, metric='euclidean') ** 2
-
-    idx = np.argsort(D, axis=1)  # sort each row
+    idx = np.argsort(D, axis=1)
 
     W = np.zeros((n, n))
     for i in range(n):
@@ -167,6 +199,28 @@ def construct_w_pkn(X, k=5, issymmetric=1):
     if issymmetric == 1:
         W = (W + W.T) / 2
 
+    return W
+
+
+def construct_w_pkn_torch(X, k=5, symmetric=True):
+    dim, n = X.shape
+    device, dtype = X.device, X.dtype
+    X = X.t()
+    D = torch.sum((X.unsqueeze(1) - X.unsqueeze(0)) ** 2, dim=2)
+
+    _, indices = torch.topk(D, k=k + 1, largest=False, dim=1)
+    indices = indices[:, 1:]
+
+    W = torch.zeros((n, n), device=device, dtype=dtype)
+
+    for i in range(n):
+        di = D[i, indices[i]]
+        dk = di[k - 1]  # the k-th nearest distance
+        weights = (dk - di) / (k * dk - di[:k].sum() + torch.finfo(dtype).eps)
+        W[i, indices[i]] = weights
+
+    if symmetric is True:
+        W = (W + W.t()) / 2
     return W
 
 
@@ -227,4 +281,64 @@ def wshrink_obj(x, rho, sX, isWeight, mode):
         X = Y
 
     x = X.flatten()
+    return x, objV
+
+
+def wshrink_obj_torch(x, rho, sX, isWeight, mode):
+    device, dtype = x.device, x.dtype
+    rho = torch.tensor(rho, dtype=dtype, device=device)
+
+    if isWeight:
+        C = torch.sqrt(torch.tensor(sX[2] * sX[1], device=device, dtype=dtype))
+    if mode is None:
+        mode = 1
+
+    x = x.reshape(sX)
+    if mode == 1:
+        Y = x.permute(2, 1, 0)
+    elif mode == 3:
+        Y = x.permute(1, 2, 0)
+    else:
+        Y = x
+
+    Yhat = torch.fft.fft(Y, dim=2)
+    objV = 0
+
+    if mode == 1:
+        n3 = sX[1]
+    elif mode == 3:
+        n3 = sX[0]
+    else:
+        n3 = sX[2]
+
+    endValue = (torch.floor(torch.tensor(n3 / 2)) + 1).to(torch.int16)
+
+    for i in range(endValue):
+        U, S, Vh = torch.linalg.svd((Yhat[:, :, i]), full_matrices=False)
+
+        if isWeight:
+            weight = C / (torch.diag(S) + torch.tensor(torch.finfo(float).eps, device=device, dtype=dtype))
+            tau = rho * weight
+            S = mnmstpy.soft_torch(S, torch.diag(tau))
+        else:
+            tau = rho
+            S = torch.maximum(S - tau, torch.tensor(0., device=device, dtype=dtype))
+        objV += torch.sum(S).real
+
+        Yhat[:, :, i] = torch.mm(torch.mm(U, torch.diag(S).to(U.dtype)), Vh)
+        if i > 1:
+            Yhat[:, :, n3 - i] = torch.mm(torch.mm(torch.conj(U), torch.diag(S).to(U.dtype)), torch.conj(Vh))
+            objV += torch.sum(S)
+
+    Y = torch.fft.ifft(Yhat, dim=2)
+    Y = torch.real(Y)
+
+    if mode == 1:
+        x = torch.fft.ifft(Y, dim=2)
+    elif mode == 3:
+        x = Y.permute(2, 0, 1)
+    else:
+        x = Y
+
+    x = x.flatten()
     return x, objV
