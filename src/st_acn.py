@@ -37,12 +37,11 @@ def st_acn(expression, spatial_network, lamb=0.001, dim=200):
     pho = 2
     max_mu = 1e6
     max_iter = 50
-    thresh = 1e-6
-
-    for iter_ in tqdm(range(max_iter)):
+    threshold = 1e-6
+    pbar = tqdm(range(max_iter))
+    for iter_ in pbar:
         B = np.array([]).reshape(0, Yh[0].shape[1])
         d = 0
-        l.logger.info(f'[st_acn]iter = {iter_} calculate E')
         for i in range(V):
             XX = X[i] - np.dot(X[i], Zv[i])
             P[i] = opt_p(Yh[i], mu, Eh[i], XX)
@@ -56,11 +55,9 @@ def st_acn(expression, spatial_network, lamb=0.001, dim=200):
             E = solve_l1l2(B, lamb / mu)
             Eh[i] = E[d: (i + 1) * dim, :]
             d += dim
-        l.logger.info(f'[st_acn]iter = {iter_} calculate E end')
 
         Z_tensor = np.stack(Zv, axis=2)
         Ys_tensor = np.stack(Ys, axis=2)
-        l.logger.info(f'[st_acn]iter = {iter_} wshrink_obj')
         G_tensor = Z_tensor + 1 / mu * Ys_tensor
         t_tensor, objk = wshrink_obj(G_tensor, 1 / mu, sX, 0, 3)  #
         T_tensor = t_tensor.reshape(sX)
@@ -77,18 +74,17 @@ def st_acn(expression, spatial_network, lamb=0.001, dim=200):
         mu = min(pho * mu, max_mu)
         errp = np.zeros(V)
         errs = np.zeros(V)
-        l.logger.info(f'[st_acn]iter = {iter_} calculate errs')
         for i in range(V):
             errp[i] = np.linalg.norm(GG[i], ord=2)
             errs[i] = np.linalg.norm(Zv[i] - T[i], ord=2)
         max_err = np.max(errp + errs)
 
-        if max_err <= thresh:
-            l.logger.info(f'[st_acn]iter = {iter_} max_err={max_err} < {thresh} break')
+        if max_err <= threshold:
+            pbar.set_description(f'[st_acn] Iter {iter_}: max_err={max_err:.4e} < thresh={threshold:.4e}. Breaking...')
             break
 
         formatted_errs = [f'{err:.4e}' for err in errs]
-        l.logger.info(f'[st_acn]iter = {iter_}  err={formatted_errs} max_err={max_err:.4e} thresh{thresh:.4e} ')
+        pbar.set_description(f'[st_acn] Iter {iter_}: err={formatted_errs}, max_err={max_err:.4e}, thresh={threshold:.4e}')
 
     Z_all = np.zeros((N, N))
     for i in range(V):

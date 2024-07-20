@@ -1,9 +1,8 @@
-# stACN
-> About Attribute Cell Network Model leverages identification of spatial domains from spatial transcriptomics data  
+# stACN 
 
-## Learning Topological Structure and Compatible Features of Cell Networks for Spatial Domains with Graph Denoising  
+## Bridging denoising and domain identication of spatially resolved transcriptomics with a network-based integrative framework 
 
-### Haiyue Wang, Wensheng Zhang, Shiquan Sun and Xiaoke Ma<sup>*</sup>    
+### Haiyue Wang, Wensheng Zhang, Shiquan Sun and Xiaoke Ma<sup>*</sup> 
 
 ### Contributing authors: xkma@xidian.edu.cn;  
 
