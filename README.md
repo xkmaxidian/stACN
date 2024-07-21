@@ -70,7 +70,7 @@ https://github.com/xkmaxidian/stACN/blob/master/tuorial/Tutorial1_10x_Visium%20(
 
 The jupyter notebook of the tutorial for installing stACN using pip and identifying spatial domains is accessible from:
 
-https://github.com/xkmaxidian/stACN/blob/master/tuorial/Visium_pypi.ipynb
+https://github.com/xkmaxidian/stACN/blob/master/tuorial/tutorial_stACN.ipynb
 
 
 
