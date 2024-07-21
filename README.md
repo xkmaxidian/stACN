@@ -26,8 +26,8 @@ model for analyzing ST data.
 #### 1. Start by using python virtual environment with [conda](https://anaconda.org/):
 
 ```shell
-conda create --name stACN python=3.9
-conda activate stACN
+conda create --name stacn  python=3.9
+conda activate stacn 
 pip install stACN
 ```
 
