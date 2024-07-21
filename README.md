@@ -25,15 +25,15 @@ model for analyzing ST data.
 
 #### 1. Start by using python virtual environment with [conda](https://anaconda.org/):
 
-```
-conda create --name stacn python=3.9
-conda activate stacn
+```shell
+conda create --name stacn  python=3.9
+conda activate stacn 
 pip install stACN
 ```
 
 (Optional) To run the notebook files in tutorials, please ensure the Jupyter package is installed in your environment:
 
-```
+```shell
 conda install -n stacn ipykernel
 python -m ipykernel install --user --name stacn --display-name stacn-jupyter
 ```
@@ -62,6 +62,10 @@ Environment 2:
 
 scanpy, pandas, numpy, scipy, anndata, sklearn, seaborn, torch, leidenalg, tqdm.
 
+<font color='red'>Note:</font> If you encounter the error message "ImportError: Please install the skmisc package via pip install --user scikit-misc" while executing sc.pp.highly_variable_genes(adata, flavor='seurat_v3', n_top_genes=3000), please execute the following command in your terminal:  
+``` shell
+pip install -i https://test.pypi.org/simple/ scikit-misc==0.2.0rc1.
+```
 ## Tutorial
 
 A jupyter notebook of the tutorial for 10 $\times$ Visium is accessible from :  
@@ -70,7 +74,8 @@ https://github.com/xkmaxidian/stACN/blob/master/tuorial/Tutorial1_10x_Visium%20(
 
 The jupyter notebook of the tutorial for installing stACN using pip and identifying spatial domains is accessible from:
 
-https://github.com/xkmaxidian/stACN/blob/master/tuorial/Visium_pypi.ipynb
+(GPU)https://github.com/xkmaxidian/stACN/blob/master/tuorial/Visium_pypi.ipynb
+(CPU)https://github.com/xkmaxidian/stACN/blob/master/tuorial/tutorials_stACN.ipynb
 
 
 
@@ -85,3 +90,9 @@ Algorithms that are compared include:
 * [SpaGCN](https://github.com/jianhuupenn/SpaGCN)
 * [SEDR](https://github.com/JinmiaoChenLab/SEDR/)
 * [STAGATE](https://github.com/QIFEIDKN/STAGATE)
+* [BASS](https://github.com/zhengli09/BASS)
+* [SpaDo](https://github.com/bm2-lab/SpaDo)
+* [STMGCN](https://github.com/sxj204/stmgcn)
+* [Banksy](https://github.com/prabhakarlab/Banksy_py)
+* [MIST](https://github.com/linhuawang/MIST)
+* [DIST](https://github.com/zhaoyp1997/DIST)
