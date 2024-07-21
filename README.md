@@ -90,3 +90,7 @@ Algorithms that are compared include:
 * [SpaGCN](https://github.com/jianhuupenn/SpaGCN)
 * [SEDR](https://github.com/JinmiaoChenLab/SEDR/)
 * [STAGATE](https://github.com/QIFEIDKN/STAGATE)
+* [BASS](https://github.com/zhengli09/BASS)
+* [SpaDo](https://github.com/bm2-lab/SpaDo)
+* [STMGCN](https://github.com/sxj204/stmgcn)
+* [Banksy](https://github.com/prabhakarlab/Banksy_py)
