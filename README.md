@@ -94,3 +94,5 @@ Algorithms that are compared include:
 * [SpaDo](https://github.com/bm2-lab/SpaDo)
 * [STMGCN](https://github.com/sxj204/stmgcn)
 * [Banksy](https://github.com/prabhakarlab/Banksy_py)
+* [MIST](https://github.com/linhuawang/MIST)
+* [DIST](https://github.com/zhaoyp1997/DIST)
