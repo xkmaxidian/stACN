@@ -96,3 +96,5 @@ Algorithms that are compared include:
 * [Banksy](https://github.com/prabhakarlab/Banksy_py)
 * [MIST](https://github.com/linhuawang/MIST)
 * [DIST](https://github.com/zhaoyp1997/DIST)
+* [MNMST](https://github.com/xkmaxidian/MNMST)
+* [SPROD](https://github.com/yunguan-wang/SPROD)
